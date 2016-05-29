@@ -36,7 +36,8 @@ mat3 Transform::rotate(const float degrees, const vec3& axis) {
 
 // Transforms the camera left around the "crystal ball" interface
 void Transform::left(float degrees, vec3& eye, vec3& up) {
-  printf("\n\n---LEFT---\nCoordinates: %.2f, %.2f, %.2f; distance: %.2f\n", eye.x, eye.y, eye.z, sqrt(pow(eye.x, 2) + pow(eye.y, 2) + pow(eye.z, 2)));
+  printf("\n\n---LEFT---\nCoordinates: %.2f, %.2f, %.2f; distance: %.2f\n", eye.
+x, eye.y, eye.z, sqrt(pow(eye.x, 2) + pow(eye.y, 2) + pow(eye.z, 2)));
   mat3 rotMat = Transform::rotate(degrees, up);
   printf("BEFORE\neye: %f, %f, %f\n up: %f, %f, %f\n", eye.x, eye.y, eye.z, up.x, up.y, up.z);
   eye = rotMat * eye;
@@ -45,7 +46,7 @@ void Transform::left(float degrees, vec3& eye, vec3& up) {
 
 // Transforms the camera up around the "crystal ball" interface
 void Transform::up(float degrees, vec3& eye, vec3& up) {
-  // YOUR CODE FOR HW1 HERE
+  // then should first undo the change
   printf("\n\n---UP---\nCoordinates: %.2f, %.2f, %.2f; distance: %.2f\n", eye.x, eye.y, eye.z, sqrt(pow(eye.x, 2) + pow(eye.y, 2) + pow(eye.z, 2)));
   vec3 w = glm::normalize(eye);
   vec3 v = glm::normalize(up);
@@ -53,7 +54,17 @@ void Transform::up(float degrees, vec3& eye, vec3& up) {
   printf("rotAxis: %f, %f, %f\n", rotAxis.x, rotAxis.y, rotAxis.z);
   mat3 rotMat = Transform::rotate(degrees, rotAxis);
   printf("BEFORE\neye: %f, %f, %f\n up: %f, %f, %f\n", eye.x, eye.y, eye.z, up.x, up.y, up.z);
-  eye = rotMat * eye;
+
+  if (eye.x != 0) {
+    float rad2 = glm::acos(glm::dot(eye, vec3(1.0, eye.y, 0.0))/(glm::length(eye)*glm::length(vec3(1.0, eye.y, 0.0)))); 
+    eye.x = 0.0;
+    eye.z = 5.0;
+    eye = rotMat * eye;
+    mat3 rotMat2 = Transform::rotate(glm::degrees(rad2), up);
+    eye = rotMat2 * eye;
+  } else {
+    eye = rotMat * eye;
+  }
   up = rotMat * up;
   printf("AFTER\neye: %f, %f, %f\n up: %f, %f, %f\n", eye.x, eye.y, eye.z, up.x, up.y, up.z);
 }
