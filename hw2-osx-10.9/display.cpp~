@@ -39,7 +39,7 @@ void transformvec (const GLfloat input[4], GLfloat output[4])
 
 void display() 
 {
-  glClearColor(0, 1, 0, 0);
+  glClearColor(0, 0, 1, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // I'm including the basic matrix setup for model view to 
@@ -48,7 +48,6 @@ void display()
   glMatrixMode(GL_MODELVIEW);
   mat4 mv; 
 
-  printf("EYE: %f, %f, %f\nCENTER: %f, %f, %f\nUP:%f, %f, %f\n", eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z); 
   // Either use the built-in lookAt function or the lookAt implemented by the user.
   if (useGlu) {
     mv = glm::lookAt(eye,center,up); 
@@ -56,15 +55,7 @@ void display()
     mv = Transform::lookAt(eye,center,up); 
   }
 
-  printf("MV: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", mv[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }
-      glLoadMatrixf(&mv[0][0]); 
+  glLoadMatrixf(&mv[0][0]); 
 
   // Lights are transformed by current modelview matrix. 
   // The shader can't do this globally. 
@@ -86,53 +77,13 @@ void display()
   mat4 sc(1.0) , tr(1.0), transf(1.0); 
   sc = Transform::scale(sx,sy,1.0); 
   tr = Transform::translate(tx,ty,0.0); 
-  printf("SC: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", sc[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }
-  printf("TR: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", tr[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }  
+
   // YOUR CODE FOR HW 2 HERE.  
   // You need to use scale, translate and modelview to 
   // set up the net transformation matrix for the objects.  
-  // Account for GLM issues, matrix order, etc.
-  mat4 mvTransp = glm::transpose(mv);
-  mat4 scTransp = glm::transpose(sc);
-  
-  mat4 scmv = sc * mv;
+  // Account for GLM issues, matrix order, etc.  
 
-  printf("MV SCALED: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", scmv[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }
-  transf = tr + scmv;
-
-  printf("TRANSF: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", transf[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }
-
-
-    glLoadMatrixf(&transf[0][0]);
-  
+  glLoadMatrixf(&transf[0][0]); 
 
   for (int i = 0 ; i < numobjects ; i++) {
     object* obj = &(objects[i]); // Grabs an object struct.

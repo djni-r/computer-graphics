@@ -8,7 +8,6 @@
 
 // Helper rotation function.  Please implement this.  
 mat3 Transform::rotate(const float degrees, const vec3& axis) {
-
   // convert degrees to rad
   const float rad = glm::radians(degrees);
 
@@ -42,7 +41,6 @@ void Transform::up(float degrees, vec3& eye, vec3& up) {
   vec3 v = glm::normalize(up);
   vec3 rotAxis = (glm::cross(w, v));
 
-
   // generate rotation matrix
   mat3 rotMat = Transform::rotate(degrees, rotAxis);
   
@@ -54,7 +52,7 @@ void Transform::up(float degrees, vec3& eye, vec3& up) {
 mat4 Transform::lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) 
 {
   // create a coordinate frame for camera
-  vec3 w = glm::normalize(eye - center);
+  vec3 w = glm::normalize(eye);
   vec3 u = glm::normalize(glm::cross(up, w));
   vec3 v = glm::cross(w, u);
 
@@ -65,44 +63,34 @@ mat4 Transform::lookAt(const vec3 &eye, const vec3 &center, const vec3 &up)
   vec3 T(-glm::dot(u, eye), -glm::dot(v, eye), -glm::dot(w, eye));
 
   // return matrix  
-  return mat4(vec4(R[0], 0.0),
-	      vec4(R[1], 0.0),
-	      vec4(R[2], 0.0),
-	      vec4(T, 1.0));
+  return mat4(vec4(R[0], 0),
+	      vec4(R[1], 0),
+	      vec4(R[2], 0),
+	      vec4(T, 1));
 
 }
 
 mat4 Transform::perspective(float fovy, float aspect, float zNear, float zFar)
 {
+  mat4 ret;
   // YOUR CODE FOR HW2 HERE
   // New, to implement the perspective transform as well.  
-  float d = 1 / tan(fovy / 2.0);
-
-  return mat4(d / aspect, 0.0, 0.0, 0.0,
-	      0.0, d, 0.0, 0.0,
-	      0.0, 0.0, (zFar + zNear) / (zNear - zFar), -1.0,
-	      0.0, 0.0, 2.0 * zFar * zNear / zNear - zFar, 0.0);
+  return ret;
 }
 
 mat4 Transform::scale(const float &sx, const float &sy, const float &sz) 
 {
+  mat4 ret;
   // YOUR CODE FOR HW2 HERE
-  // Implement scaling
-  mat4 ret(sx, 0.0, 0.0, 0.0,
-	      0.0, sy, 0.0, 0.0,
-	      0.0, 0.0, sz, 0.0,
-	      0.0, 0.0, 0.0, 1.0);
+  // Implement scaling 
   return ret;
 }
 
 mat4 Transform::translate(const float &tx, const float &ty, const float &tz) 
 {
-   // YOUR CODE FOR HW2 HERE
+  mat4 ret;
+  // YOUR CODE FOR HW2 HERE
   // Implement translation 
-  mat4 ret(0.0, 0.0, 0.0, 0.0,
-	      0.0, 0.0, 0.0, 0.0,
-	      0.0, 0.0, 0.0, 0.0,
-	      tx, ty, tz, 0.0);
   return ret;
 }
 

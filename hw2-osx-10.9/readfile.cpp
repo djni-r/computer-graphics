@@ -163,7 +163,10 @@ void readfile(const char* filename)
             // You may need to use the upvector fn in Transform.cpp
             // to set up correctly. 
             // Set eyeinit upinit center fovy in variables.h 
-
+	    eyeinit = vec3(values[0], values[1], -values[2]);
+	    center = vec3(values[3], values[4], values[5]);
+	    upinit = Transform::upvector(vec3(values[6], values[7], values[8]), eyeinit);
+	    fovy = values[9];
           }
         }
 
@@ -236,7 +239,7 @@ void readfile(const char* filename)
             // See how the stack is affected, as above.  
             // Note that rotate returns a mat3. 
             // Also keep in mind what order your matrix is!
-
+	    
           }
         }
 
