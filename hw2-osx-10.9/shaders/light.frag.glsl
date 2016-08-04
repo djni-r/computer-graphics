@@ -31,19 +31,41 @@ uniform vec4 specular;
 uniform vec4 emission; 
 uniform float shininess; 
 
+
 void main (void) 
 {       
-    if (enablelighting) {       
-        vec4 finalcolor; 
+  if (enablelighting) {
 
-        // YOUR CODE FOR HW 2 HERE
-        // A key part is implementation of the fragment shader
+    vec4 finalcolor; 
 
-        // Color all pixels black for now, remove this in your implementation!
-        finalcolor = vec4(0,0,0,1); 
+    // YOUR CODE FOR HW 2 HERE
+    // A key part is implementation of the fragment shader
 
-        gl_FragColor = finalcolor; 
-    } else {
-        gl_FragColor = color; 
+    vec4 sumLights = vec4(0);
+    vec4 _myPos = gl_ModelViewMatrix * myvertex;
+    vec3 myPos = _myPos.xyz/_myPos.w;
+    const vec3 eyePos = vec3(0);
+    vec3 eyeDir = normalize(eyePos - myPos);
+    vec3 _normal = (gl_ModelViewMatrixInverseTranspose*vec4(mynormal,0.0)).xyz ; 
+    vec3 normal = normalize(_normal);
+    
+    for (int i = 0; i < numused; i++) {
+      vec3 lightDir;
+      if (lightposn[i].w == 0) {
+	lightDir = normalize(lightposn[i].xyz);
+      } else {
+	vec3 lightPos = lightposn[i].xyz/lightposn[i].w;
+	lightDir = normalize(lightPos - myPos);
+      }
+      vec3 halfAng = normalize(lightDir + eyeDir);
+
+      sumLights += lightcolor[i] * (diffuse * max(dot(normal, lightDir), 0.0) + specular * pow( max(dot(normal, halfAng), 0.0), shininess));
     }
+
+    finalcolor = ambient + emission + sumLights; 
+
+    gl_FragColor = finalcolor; 
+  } else {
+    gl_FragColor = color; 
+  }
 }

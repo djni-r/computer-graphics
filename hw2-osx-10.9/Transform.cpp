@@ -21,17 +21,18 @@ mat3 Transform::rotate(const float degrees, const vec3& axis) {
 		   axis.x * axis.z, axis.y * axis.z, pow(axis.z, 2));
 
   // perpendicular component mat
-  mat3 AMat = mat3(0, axis[2], -1*axis[1],
-		   -1*axis[2], 0, axis[0],
-		   axis[1], -1*axis[0], 0);
+  mat3 AMat = mat3(0, axis.z, -1*axis.y,
+		   -1*axis.z, 0, axis.x,
+		   axis.y, -1*axis.x, 0);
 
   // create rotation matrix
-  return cos(rad) * I + (1 - cos(rad))*PMat + AMat * sin(rad);
+  return cos(rad) * I + PMat * (1 - cos(rad)) + AMat * sin(rad);
 }
 
 // Transforms the camera left around the "crystal ball" interface
 void Transform::left(float degrees, vec3& eye, vec3& up) {
   mat3 rotMat = Transform::rotate(degrees, up);
+  up = rotMat * glm::normalize(up);
   eye = rotMat * eye;
 }
 
@@ -40,7 +41,7 @@ void Transform::up(float degrees, vec3& eye, vec3& up) {
   // prepare rotation axis
   vec3 w = glm::normalize(eye);
   vec3 v = glm::normalize(up);
-  vec3 rotAxis = (glm::cross(w, v));
+  vec3 rotAxis = glm::normalize(glm::cross(w, v));
 
 
   // generate rotation matrix
@@ -48,7 +49,7 @@ void Transform::up(float degrees, vec3& eye, vec3& up) {
   
   // apply rotation matrix to eye and up vecs
   eye = rotMat * eye;
-  up = rotMat * up;
+  up = rotMat * glm::normalize(up);
 }
 
 mat4 Transform::lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) 
@@ -56,7 +57,7 @@ mat4 Transform::lookAt(const vec3 &eye, const vec3 &center, const vec3 &up)
   // create a coordinate frame for camera
   vec3 w = glm::normalize(eye - center);
   vec3 u = glm::normalize(glm::cross(up, w));
-  vec3 v = glm::cross(w, u);
+  vec3 v = glm::normalize(glm::cross(w, u));
 
   // rotation matrix
   mat3 R = glm::transpose(mat3(u, v, w));
@@ -76,12 +77,12 @@ mat4 Transform::perspective(float fovy, float aspect, float zNear, float zFar)
 {
   // YOUR CODE FOR HW2 HERE
   // New, to implement the perspective transform as well.  
-  float d = 1 / tan(fovy / 2.0);
+  float d = 1 / tan(glm::radians(fovy) / 2.0);
 
   return mat4(d / aspect, 0.0, 0.0, 0.0,
 	      0.0, d, 0.0, 0.0,
 	      0.0, 0.0, (zFar + zNear) / (zNear - zFar), -1.0,
-	      0.0, 0.0, 2.0 * zFar * zNear / zNear - zFar, 0.0);
+	      0.0, 0.0, (2.0 * zFar * zNear) / (zNear - zFar), 0.0);
 }
 
 mat4 Transform::scale(const float &sx, const float &sy, const float &sz) 
@@ -99,10 +100,10 @@ mat4 Transform::translate(const float &tx, const float &ty, const float &tz)
 {
    // YOUR CODE FOR HW2 HERE
   // Implement translation 
-  mat4 ret(0.0, 0.0, 0.0, 0.0,
-	      0.0, 0.0, 0.0, 0.0,
-	      0.0, 0.0, 0.0, 0.0,
-	      tx, ty, tz, 0.0);
+  mat4 ret(1.0, 0.0, 0.0, 0.0,
+	      0.0, 1.0, 0.0, 0.0,
+	      0.0, 0.0, 1.0, 0.0,
+	      tx, ty, tz, 1.0);
   return ret;
 }
 
@@ -112,7 +113,7 @@ mat4 Transform::translate(const float &tx, const float &ty, const float &tz)
 // This function is provided as a helper, in case you want to use it. 
 // Using this function (in readfile.cpp or display.cpp) is optional.  
 
-vec3 Transform::upvector(const vec3 &up, const vec3 & zvec) 
+vec3 Transform::upvector(const vec3 &up, const vec3 &zvec) 
 {
   vec3 x = glm::cross(up,zvec); 
   vec3 y = glm::cross(zvec,x); 

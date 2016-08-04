@@ -39,8 +39,9 @@ void transformvec (const GLfloat input[4], GLfloat output[4])
 
 void display() 
 {
-  glClearColor(0, 1, 0, 0);
+  glClearColor(0, 0, 1, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
   // I'm including the basic matrix setup for model view to 
   // give some sense of how this works.  
@@ -56,7 +57,7 @@ void display()
     mv = Transform::lookAt(eye,center,up); 
   }
 
-  printf("MV: \n");
+  printf("MV lookat: \n");
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       printf("%f ", mv[j][i]);
@@ -64,75 +65,41 @@ void display()
     }
     printf("\n");
   }
-      glLoadMatrixf(&mv[0][0]); 
+
+  glLoadMatrixf(&mv[0][0]);
 
   // Lights are transformed by current modelview matrix. 
   // The shader can't do this globally. 
   // So we need to do so manually.  
   if (numused) {
-    glUniform1i(enablelighting,true);
+    glUniform1i(enablelighting, true);
 
     // YOUR CODE FOR HW 2 HERE.  
     // You need to pass the light positions and colors to the shader. 
     // glUniform4fv() and similar functions will be useful. See FAQ for help with these functions.
     // The lightransf[] array in variables.h and transformvec() might also be useful here.
     // Remember that light positions must be transformed by modelview.  
-
+    for (int i = 0; i < numused; i++) {
+      transformvec(&lightposn[4*i], &lightransf[4*i]);
+    }
+    
+    glUniform4fv(lightpos, numused, lightransf);
+    glUniform4fv(lightcol, numused, lightcolor);  
   } else {
-    glUniform1i(enablelighting,false); 
+    glUniform1i(enablelighting, false); 
   }
 
   // Transformations for objects, involving translation and scaling 
-  mat4 sc(1.0) , tr(1.0), transf(1.0); 
+  mat4 sc(1.0) , tr(1.0), transf(1.0);
+  
   sc = Transform::scale(sx,sy,1.0); 
-  tr = Transform::translate(tx,ty,0.0); 
-  printf("SC: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", sc[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }
-  printf("TR: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", tr[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }  
+  tr = Transform::translate(tx,ty,0.0);
+  
   // YOUR CODE FOR HW 2 HERE.  
   // You need to use scale, translate and modelview to 
   // set up the net transformation matrix for the objects.  
-  // Account for GLM issues, matrix order, etc.
-  mat4 mvTransp = glm::transpose(mv);
-  mat4 scTransp = glm::transpose(sc);
-  
-  mat4 scmv = sc * mv;
-
-  printf("MV SCALED: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", scmv[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }
-  transf = tr + scmv;
-
-  printf("TRANSF: \n");
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      printf("%f ", transf[j][i]);
-      printf(" ");
-    }
-    printf("\n");
-  }
-
-
-    glLoadMatrixf(&transf[0][0]);
-  
+  // Account for GLM issues, matrix order, etc. 
+  transf = mv * tr * sc;
 
   for (int i = 0 ; i < numobjects ; i++) {
     object* obj = &(objects[i]); // Grabs an object struct.
@@ -141,7 +108,15 @@ void display()
     // Set up the object transformations 
     // And pass in the appropriate material properties
     // Again glUniform() related functions will be useful
-
+    
+    glLoadMatrixf(&(transf * obj->transform)[0][0]);
+    glUniform4fv(ambientcol, 1, obj->ambient);
+    glUniform4fv(diffusecol, 1, obj->diffuse);
+    glUniform4fv(specularcol, 1, obj->specular);
+    glUniform4fv(emissioncol, 1, obj->emission);
+    glUniform1f(shininesscol, obj->shininess);    
+    glUniform1i(numusedcol, numused);
+    
     // Actually draw the object
     // We provide the actual glut drawing functions for you.  
     // Remember that obj->type is notation for accessing struct fields

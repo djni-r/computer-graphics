@@ -180,7 +180,8 @@ void init()
   diffusecol = glGetUniformLocation(shaderprogram,"diffuse");       
   specularcol = glGetUniformLocation(shaderprogram,"specular");       
   emissioncol = glGetUniformLocation(shaderprogram,"emission");       
-  shininesscol = glGetUniformLocation(shaderprogram,"shininess");       
+  shininesscol = glGetUniformLocation(shaderprogram,"shininess");
+  printf("diffuse %i numused %i", diffusecol, numused);
 }
 
 int main(int argc, char* argv[]) 

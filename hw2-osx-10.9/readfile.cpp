@@ -104,7 +104,10 @@ void readfile(const char* filename)
               // Note that values[0...7] shows the read in values 
               // Make use of lightposn[] and lightcolor[] arrays in variables.h
               // Those arrays can then be used in display too.  
-
+	      for (i = 0; i < 4; i++) {
+		lightposn[4*numused + i] = values[i];
+		lightcolor[4*numused + i] = values[4 + i];
+	      }
               ++numused; 
             }
           }
@@ -163,9 +166,9 @@ void readfile(const char* filename)
             // You may need to use the upvector fn in Transform.cpp
             // to set up correctly. 
             // Set eyeinit upinit center fovy in variables.h 
-	    eyeinit = vec3(values[0], values[1], -values[2]);
+	    eyeinit = vec3(values[0], values[1], values[2]);
 	    center = vec3(values[3], values[4], values[5]);
-	    upinit = Transform::upvector(vec3(values[6], values[7], values[8]), eyeinit);
+	    upinit = Transform::upvector(vec3(values[6], values[7], values[8]), eyeinit - center);
 	    fovy = values[9];
           }
         }
@@ -214,9 +217,13 @@ void readfile(const char* filename)
             // YOUR CODE FOR HW 2 HERE.  
             // Think about how the transformation stack is affected
             // You might want to use helper functions on top of file. 
-            // Also keep in mind what order your matrix is!
-
-          }
+            // Also keep in mind what order your matrix is
+	    //float * f = 0;
+	    // matransform(transfstack, &values[0]);
+	    const mat4 M = Transform::translate(values[0], values[1], values[2]);
+	    mat4 &TT = transfstack.top();
+	    rightmultiply(M, transfstack);
+	  }
         }
         else if (cmd == "scale") {
           validinput = readvals(s,3,values); 
@@ -226,8 +233,11 @@ void readfile(const char* filename)
             // Think about how the transformation stack is affected
             // You might want to use helper functions on top of file.  
             // Also keep in mind what order your matrix is!
-
-          }
+	    
+	    //matransform(transfstack, &values[0]);
+	    const mat4 M = Transform::scale(values[0], values[1], values[2]);
+	    rightmultiply(M, transfstack);
+	  }
         }
         else if (cmd == "rotate") {
           validinput = readvals(s,4,values); 
@@ -239,7 +249,14 @@ void readfile(const char* filename)
             // See how the stack is affected, as above.  
             // Note that rotate returns a mat3. 
             // Also keep in mind what order your matrix is!
-	    
+
+	    mat3 R = Transform::rotate(values[3], vec3(values[0], values[1], values[2]));
+	    mat4 M = mat4(vec4(R[0], 0.0),
+			  vec4(R[1], 0.0),
+			  vec4(R[2], 0.0),
+			  vec4(0.0, 0.0, 0.0, 1.0));
+
+	    rightmultiply(M, transfstack);
           }
         }
 
