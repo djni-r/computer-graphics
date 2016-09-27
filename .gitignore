@@ -1,0 +1,6 @@
+hw0-osx-10.9/*
+*/*.o
+*/*.png
+*/osxlib
+*/glm-0.9.2.7/*
+*/include/*
